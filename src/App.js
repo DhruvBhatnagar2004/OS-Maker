@@ -1,12 +1,22 @@
-import logo from "./logo.svg";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
+import Intro from "./components/Intro";
+import CustomPage from "./components/CustomPage";
+import Navbar from "./components/Navbar";
 
 function App() {
   return (
-    <div>
-     <h1>OS MAKER</h1>
+    <Router>
+      <div>
+        <Navbar />
 
-    </div>
+        {/* Define Routes */}
+        <Routes>
+          <Route path="/" element={<Intro />} />
+          <Route path="/custom-page" element={<CustomPage />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
