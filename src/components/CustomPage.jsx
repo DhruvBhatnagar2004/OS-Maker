@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import api from '../services/api';
 
 function Predefined() {
   return (
@@ -67,6 +68,8 @@ function CustomPage() {
   const [selectedOS, setSelectedOS] = useState("");
   const [selectedOption, setSelectedOption] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const dropdownRef = useRef(null);
 
   const handleOSSelection = (osName) => {
@@ -76,6 +79,43 @@ function CustomPage() {
   const handleSelection = (option) => {
     setSelectedOption(option);
     setIsDropdownOpen(false);
+  };
+
+  const getPredefinedSelection = () => {
+    const selectedRadio = document.querySelector('input[name="predefined"]:checked');
+    if (selectedRadio) {
+      return selectedRadio.parentElement.querySelector('.label-text').textContent;
+    }
+    return null;
+  };
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    setError(null);
+
+    const configData = {
+      operating_system: selectedOS,
+      config_type: selectedOption,
+      configuration: {
+        type: selectedOption === 'Predefined' ? getPredefinedSelection() : 'Custom',
+        // Add any custom configuration data here if needed
+      }
+    };
+
+    // Add pretty console log
+    console.log('Sending configuration to backend:');
+    console.log(JSON.stringify(configData, null, 2));
+
+    try {
+      const response = await api.submitConfiguration(configData);
+      console.log('Backend response:', JSON.stringify(response, null, 2));
+      // Add success handling here (e.g., show success message, redirect)
+    } catch (err) {
+      setError('Failed to submit configuration');
+      console.error('Submission error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -191,9 +231,20 @@ function CustomPage() {
           </div>
 
           {selectedOption && (
-            <button className="btn w-52 mt-8 bg-green-600 hover:bg-green-700 text-white">
-              Submit
-            </button>
+            <>
+              <button 
+                className={`btn w-52 mt-8 ${
+                  loading ? 'bg-gray-500' : 'bg-green-600 hover:bg-green-700'
+                } text-white`}
+                onClick={handleSubmit}
+                disabled={loading}
+              >
+                {loading ? 'Submitting...' : 'Submit'}
+              </button>
+              {error && (
+                <div className="text-red-500 mt-4">{error}</div>
+              )}
+            </>
           )}
         </div>
       )}
