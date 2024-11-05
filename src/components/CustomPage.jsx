@@ -1,134 +1,202 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
-// Define your components for Predefined and Customization
 function Predefined() {
   return (
-    <div>
-      <h1>You selected Predefined!</h1>
-      <p>Here are some predefined options</p>
-      <div className="form-control">
-        <label className="label cursor-pointer">
-          <span className="label-text">Minimal</span>
-          <input
-            type="radio"
-            name="radio-10"
-            className="radio checked:bg-red-500"
-            defaultChecked
-          />
-        </label>
-      </div>
-      <div className="form-control">
-        <label className="label cursor-pointer">
-          <span className="label-text">Standard</span>
-          <input
-            type="radio"
-            name="radio-10"
-            className="radio checked:bg-blue-500"
-          />
-        </label>
-      </div>
-      <div className="form-control">
-        <label className="label cursor-pointer">
-          <span className="label-text">RAM-Efficient</span>
-          <input
-            type="radio"
-            name="radio-10"
-            className="radio checked:bg-violet-500"
-          />
-        </label>
+    <div className="mt-8 rounded-lg p-6 flex flex-col items-center">
+      <h2 className="text-2xl mb-6 text-white font-semibold text-center">Predefined Configurations</h2>
+      <div className="flex space-x-4 justify-center">
+        <div className="form-control bg-gray-700 p-3 rounded-lg hover:bg-gray-600 transition-colors w-64">
+          <label className="label cursor-pointer flex justify-between items-center">
+            <div>
+              <span className="label-text text-white text-lg font-medium">Minimal</span>
+              <p className="text-gray-300 text-sm mt-1">Basic system with essential packages only</p>
+            </div>
+            <input
+              type="radio"
+              name="predefined"
+              className="radio checked:bg-red-500 w-5 h-5"
+              defaultChecked
+            />
+          </label>
+        </div>
+
+        <div className="form-control bg-gray-700 p-3 rounded-lg hover:bg-gray-600 transition-colors w-64">
+          <label className="label cursor-pointer flex justify-between items-center">
+            <div>
+              <span className="label-text text-white text-lg font-medium">Standard</span>
+              <p className="text-gray-300 text-sm mt-1">Balanced configuration for daily use</p>
+            </div>
+            <input
+              type="radio"
+              name="predefined"
+              className="radio checked:bg-blue-500 w-5 h-5"
+            />
+          </label>
+        </div>
+
+        <div className="form-control bg-gray-700 p-3 rounded-lg hover:bg-gray-600 transition-colors w-64">
+          <label className="label cursor-pointer flex justify-between items-center">
+            <div>
+              <span className="label-text text-white text-lg font-medium">RAM-Efficient</span>
+              <p className="text-gray-300 text-sm mt-1">Optimized for systems with limited memory</p>
+            </div>
+            <input
+              type="radio"
+              name="predefined"
+              className="radio checked:bg-violet-500 w-5 h-5"
+            />
+          </label>
+        </div>
       </div>
     </div>
   );
 }
 
 function Customization() {
-  return <div>Please enter your customization details.</div>;
+  return (
+    <div className="mt-8 flex flex-col items-center">
+      <h2 className="text-2xl mb-6 text-white font-semibold text-center">
+        Customize Your Configuration
+      </h2>
+      <p className="text-gray-300 text-center">Please enter your customization details here.</p>
+    </div>
+  );
 }
 
 function CustomPage() {
-  const [selectedOption, setSelectedOption] = useState(""); // State to track the selected option
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State to control dropdown visibility
+  const [selectedOS, setSelectedOS] = useState("");
+  const [selectedOption, setSelectedOption] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
-  const handleSelection = (option) => {
-    setSelectedOption(option); // Set the selected option
-    setIsDropdownOpen(false); // Close the dropdown after selection
+  const handleOSSelection = (osName) => {
+    setSelectedOS(osName);
   };
 
+  const handleSelection = (option) => {
+    setSelectedOption(option);
+    setIsDropdownOpen(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
-    <div className="flex flex-col items-center h-screen">
-      <div>
-        <h1 className="flex justify-center text-3xl p-4">Select Operating System </h1>
-        <div className="flex justify-around w-[100vw]">
-          <div className="card bg-base-100 w-96 shadow-xl">
-            <figure>
-              <img
-                src="https://www.unixtutorial.org/images/software/ubuntu-linux.png"
-                alt="Shoes"
-              />
-            </figure>
-            <div className="card-body">
-              <h2 className="card-title">Ubuntu</h2>
-              <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
-              <div className="card-actions justify-end">
-                <button className="btn btn-primary">Select</button>
-              </div>
+    <div className="flex flex-col items-center min-h-screen p-8">
+      <h1 className="text-3xl p-4 text-white">Select Operating System</h1>
+      
+      {/* Fixed position for cards with consistent gap */}
+      <div className="flex justify-center gap-20 w-full mb-8">
+        <div className="card bg-gray-800 w-80 shadow-xl text-gray-200">
+          <figure>
+            <img
+              src="https://www.unixtutorial.org/images/software/ubuntu-linux.png"
+              alt="Ubuntu"
+            />
+          </figure>
+          <div className="card-body">
+            <h2 className="card-title">Ubuntu</h2>
+            <p>
+              Ubuntu is a popular open-source operating system based on Linux.
+            </p>
+            <div className="card-actions justify-end">
+              <button
+                className={`btn ${
+                  selectedOS === "Ubuntu"
+                    ? "bg-gray-400 hover:bg-gray-400 cursor-not-allowed opacity-70"
+                    : "bg-blue-600 hover:bg-blue-700"
+                } text-white`}
+                onClick={() => handleOSSelection("Ubuntu")}
+              >
+                {selectedOS === "Ubuntu" ? "Selected" : "Select"}
+              </button>
             </div>
           </div>
-          <div className="card bg-base-100 w-96 shadow-xl">
-            <figure>
-              <img
-                src="https://colfaxresearch.com/wp-content/uploads/2015/06/archlinux-logo-800x350.jpg"
-                alt="Shoes"
-              />
-            </figure>
-            <div className="card-body">
-              <h2 className="card-title">Arch-Linux</h2>
-              <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
-              <div className="card-actions justify-end">
-                <button className="btn btn-primary">Select</button>
-              </div>
+        </div>
+        <div className="card bg-gray-800 w-80 shadow-xl text-gray-200">
+          <figure>
+            <img
+              src="https://colfaxresearch.com/wp-content/uploads/2015/06/archlinux-logo-800x350.jpg"
+              alt="Arch Linux"
+            />
+          </figure>
+          <div className="card-body">
+            <h2 className="card-title">Arch Linux</h2>
+            <p>
+              Arch Linux is a lightweight and flexible Linux distribution.
+            </p>
+            <div className="card-actions justify-end">
+              <button
+                className={`btn ${
+                  selectedOS === "Arch Linux"
+                    ? "bg-gray-400 hover:bg-gray-400 cursor-not-allowed opacity-70"
+                    : "bg-blue-600 hover:bg-blue-700"
+                } text-white`}
+                onClick={() => handleOSSelection("Arch Linux")}
+              >
+                {selectedOS === "Arch Linux" ? "Selected" : "Select"}
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Dropdown Button */}
-      <div className="dropdown">
-        <div
-          tabIndex={0}
-          role="button"
-          className="btn m-1"
-          onClick={() => setIsDropdownOpen(!isDropdownOpen)} // Toggle dropdown visibility
-        >
-          Options
+      {/* Separate container for configuration options */}
+      {selectedOS && (
+        <div className="w-full max-w-4xl mt-6 flex flex-col items-center">
+          <h2 className="text-2xl text-white mb-4 text-center">
+            You have selected: <strong>{selectedOS}</strong>
+          </h2>
+
+          <div className="dropdown relative flex flex-col items-center" ref={dropdownRef}>
+            <button
+              className="btn w-52 bg-gray-700 text-gray-200 hover:bg-gray-600"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            >
+              {selectedOption ? selectedOption : "Choose Option"}
+            </button>
+            {isDropdownOpen && (
+              <ul className="dropdown-content menu absolute left-1/2 transform -translate-x-1/2 mt-2 bg-gray-800 rounded-box w-52 p-2 shadow">
+                <li>
+                  <button
+                    className="block w-full px-4 py-2 text-gray-200 hover:bg-gray-700 rounded text-left"
+                    onClick={() => handleSelection("Predefined")}
+                  >
+                    Predefined
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className="block w-full px-4 py-2 text-gray-200 hover:bg-gray-700 rounded text-left"
+                    onClick={() => handleSelection("Customization")}
+                  >
+                    Customization
+                  </button>
+                </li>
+              </ul>
+            )}
+          </div>
+
+          <div className="w-full flex flex-col items-center">
+            {selectedOption === "Predefined" && <Predefined />}
+            {selectedOption === "Customization" && <Customization />}
+          </div>
+
+          {selectedOption && (
+            <button className="btn w-52 mt-8 bg-green-600 hover:bg-green-700 text-white">
+              Submit
+            </button>
+          )}
         </div>
-
-        {/* Conditionally render the dropdown menu */}
-        {isDropdownOpen && (
-          <ul
-            tabIndex={0}
-            className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
-          >
-            <li>
-              <a onClick={() => handleSelection("predefined")}>Predefined</a>
-            </li>
-            <li>
-              <a onClick={() => handleSelection("customization")}>
-                Customization
-              </a>
-            </li>
-          </ul>
-        )}
-      </div>
-
-      {/* Conditionally render components based on the selection */}
-      <div className="mt-6">
-        {selectedOption === "predefined" && <Predefined />}
-        {selectedOption === "customization" && <Customization />}
-      </div>
-
-      {/* Submit Button */}
-      <button className="btn m-4">Submit</button>
+      )}
     </div>
   );
 }
