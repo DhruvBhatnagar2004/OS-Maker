@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from 'react';
 import api from '../services/api';
 
 function Predefined() {
@@ -203,23 +203,33 @@ function CustomPage() {
     console.log('Submitting configuration:', JSON.stringify(configData, null, 2));
 
     try {
-      // If wallpaper is selected, use FormData to send both file and config
+      let response;
       if (uploadWallpaper && wallpaperFile) {
         const formData = new FormData();
         formData.append('wallpaper', wallpaperFile);
         formData.append('config', JSON.stringify(configData));
         
         console.log('Uploading with wallpaper:', wallpaperFile.name);
-        const response = await api.submitConfigurationWithWallpaper(formData);
+        response = await api.submitConfigurationWithWallpaper(formData);
         console.log('Backend response:', JSON.stringify(response, null, 2));
       } else {
         // Regular JSON submission without wallpaper
-        const response = await api.submitConfiguration(configData);
+        response = await api.submitConfiguration(configData);
         console.log('Backend response:', JSON.stringify(response, null, 2));
       }
-    } catch (err) {
-      setError('Failed to submit configuration');
-      console.error('Submission error:', err);
+
+      // Check if the configuration type is Predefined and download_uri exists
+      if (configData.config_type === 'Predefined' && response.download_iso_url) {
+        // Trigger file download
+        window.location.href = response.download_iso_url;
+      } else {
+        // Handle non-predefined configurations
+        alert('Configuration submitted successfully!');
+      }
+
+    } catch (error) {
+      setError('Failed to submit configuration.');
+      console.error('Submission error:', error);
     } finally {
       setLoading(false);
     }
@@ -262,6 +272,7 @@ function CustomPage() {
                     : "bg-blue-600 hover:bg-blue-700"
                 } text-white`}
                 onClick={() => handleOSSelection("Ubuntu")}
+                disabled={selectedOS === "Ubuntu"}
               >
                 {selectedOS === "Ubuntu" ? "Selected" : "Select"}
               </button>
@@ -288,6 +299,7 @@ function CustomPage() {
                     : "bg-blue-600 hover:bg-blue-700"
                 } text-white`}
                 onClick={() => handleOSSelection("Arch Linux")}
+                disabled={selectedOS === "Arch Linux"}
               >
                 {selectedOS === "Arch Linux" ? "Selected" : "Select"}
               </button>
