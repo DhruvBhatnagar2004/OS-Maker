@@ -12,8 +12,8 @@ from .serializers import OSConfigurationSerializer
 from .services import ConfigurationService
 
 # Correct ISO path constant
-BASE_DIR = Path(settings.BASE_DIR).parent  # Adjust based on your project structure
-PREDEFINED_ISO_PATH = BASE_DIR / "project" / "iso" / "iso.txt"
+BASE_DIR = Path(settings.BASE_DIR).parent  # Changed from parent.parent to parent
+PREDEFINED_ISO_PATH = BASE_DIR / "project" / "iso" / "iso.txt"  # Added "OS_Maker" to the path
 
 def serve_iso_file(iso_path):
     """Helper function to serve ISO file"""

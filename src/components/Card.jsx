@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaLinkedin, FaGithub, FaInstagram } from "react-icons/fa";
+// import { FaLinkedin, FaGithub, FaInstagram } from "react-icons/fa";
 import "./Card.css";
 
 const Card = () => {
