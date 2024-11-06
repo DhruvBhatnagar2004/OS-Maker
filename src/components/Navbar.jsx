@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import CustomPage from "./CustomPage";
+import About from "./About";
 
 function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -36,6 +37,11 @@ function Navbar() {
     navigate("/Custom-Page"); // Change this path to match your Intro Page route
   };
 
+  const goToAboutPage = () => {
+    setIsDropdownOpen(false); // Close the dropdown
+    navigate("/About"); // Change this path to match your Intro Page route
+  };
+
   return (
     <div className="navbar w-[100vw]">
       <div className="navbar-start w-0">
@@ -67,13 +73,28 @@ function Navbar() {
               className="menu menu-sm dropdown-content bg-gray-800 rounded-box z-[1] mt-3 w-52 p-2 shadow"
             >
               <li>
-                <a onClick={goToIntroPage} className="text-gray-200 hover:bg-gray-700">Homepage</a>
+                <a
+                  onClick={goToIntroPage}
+                  className="text-gray-200 hover:bg-gray-700"
+                >
+                  Homepage
+                </a>
               </li>
               <li>
-                <a onClick={goToCustomPage} className="text-gray-200 hover:bg-gray-700">Custom Page</a>
+                <a
+                  onClick={goToCustomPage}
+                  className="text-gray-200 hover:bg-gray-700"
+                >
+                  Custom Page
+                </a>
               </li>
               <li>
-                <a href="#about-us" className="text-gray-200 hover:bg-gray-700">About us</a>
+                <a
+                  onClick={goToAboutPage}
+                  className="text-gray-200 hover:bg-gray-700"
+                >
+                  About us
+                </a>
               </li>
             </ul>
           )}

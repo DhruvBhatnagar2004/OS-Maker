@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Intro from "./components/Intro";
 import CustomPage from "./components/CustomPage";
 import Navbar from "./components/Navbar";
+import About from "./components/About";
+import WaitingPage from "./components/WaitingPage";
 
 function App() {
   const appStyle = {
@@ -27,6 +29,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Intro />} />
           <Route path="/custom-page" element={<CustomPage />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/waiting" element={<WaitingPage />} />
         </Routes>
       </div>
     </Router>

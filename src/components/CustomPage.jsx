@@ -1,16 +1,23 @@
-import React, { useState, useRef, useEffect } from 'react';
-import api from '../services/api';
+import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../services/api";
 
 function Predefined() {
   return (
     <div className="mt-8 rounded-lg p-6 flex flex-col items-center">
-      <h2 className="text-2xl mb-6 text-white font-semibold text-center">Predefined Configurations</h2>
+      <h2 className="text-2xl mb-6 text-white font-semibold text-center">
+        Predefined Configurations
+      </h2>
       <div className="flex space-x-4 justify-center">
         <div className="form-control bg-gray-700 p-3 rounded-lg hover:bg-gray-600 transition-colors w-64">
           <label className="label cursor-pointer flex justify-between items-center">
             <div>
-              <span className="label-text text-white text-lg font-medium">Minimal</span>
-              <p className="text-gray-300 text-sm mt-1">Basic system with essential packages only</p>
+              <span className="label-text text-white text-lg font-medium">
+                Minimal
+              </span>
+              <p className="text-gray-300 text-sm mt-1">
+                Basic system with essential packages only
+              </p>
             </div>
             <input
               type="radio"
@@ -24,8 +31,12 @@ function Predefined() {
         <div className="form-control bg-gray-700 p-3 rounded-lg hover:bg-gray-600 transition-colors w-64">
           <label className="label cursor-pointer flex justify-between items-center">
             <div>
-              <span className="label-text text-white text-lg font-medium">Standard</span>
-              <p className="text-gray-300 text-sm mt-1">Balanced configuration for daily use</p>
+              <span className="label-text text-white text-lg font-medium">
+                Standard
+              </span>
+              <p className="text-gray-300 text-sm mt-1">
+                Balanced configuration for daily use
+              </p>
             </div>
             <input
               type="radio"
@@ -38,8 +49,12 @@ function Predefined() {
         <div className="form-control bg-gray-700 p-3 rounded-lg hover:bg-gray-600 transition-colors w-64">
           <label className="label cursor-pointer flex justify-between items-center">
             <div>
-              <span className="label-text text-white text-lg font-medium">RAM-Efficient</span>
-              <p className="text-gray-300 text-sm mt-1">Optimized for systems with limited memory</p>
+              <span className="label-text text-white text-lg font-medium">
+                RAM-Efficient
+              </span>
+              <p className="text-gray-300 text-sm mt-1">
+                Optimized for systems with limited memory
+              </p>
             </div>
             <input
               type="radio"
@@ -59,37 +74,37 @@ function Customization({
   wallpaperFile,
   setWallpaperFile,
   selectedPackages,
-  setSelectedPackages
+  setSelectedPackages,
 }) {
   const availablePackages = {
-    'Development Tools': [
-      { id: 'git', name: 'Git - Version Control' },
-      { id: 'vscode', name: 'Visual Studio Code' },
-      { id: 'docker', name: 'Docker' },
+    "Development Tools": [
+      { id: "git", name: "Git - Version Control" },
+      { id: "vscode", name: "Visual Studio Code" },
+      { id: "docker", name: "Docker" },
     ],
-    'Utilities': [
-      { id: 'firefox', name: 'Firefox Browser' },
-      { id: 'vlc', name: 'VLC Media Player' },
-      { id: 'terminal', name: 'Terminal Emulator' },
+    Utilities: [
+      { id: "firefox", name: "Firefox Browser" },
+      { id: "vlc", name: "VLC Media Player" },
+      { id: "terminal", name: "Terminal Emulator" },
     ],
-    'System Tools': [
-      { id: 'htop', name: 'Htop System Monitor' },
-      { id: 'firewall', name: 'Firewall Configuration' },
-      { id: 'backup', name: 'Backup Utility' },
-    ]
+    "System Tools": [
+      { id: "htop", name: "Htop System Monitor" },
+      { id: "firewall", name: "Firewall Configuration" },
+      { id: "backup", name: "Backup Utility" },
+    ],
   };
 
   const handlePackageToggle = (packageId) => {
-    setSelectedPackages(prev => 
-      prev.includes(packageId) 
-        ? prev.filter(id => id !== packageId)
+    setSelectedPackages((prev) =>
+      prev.includes(packageId)
+        ? prev.filter((id) => id !== packageId)
         : [...prev, packageId]
     );
   };
 
   const handleWallpaperChange = (event) => {
     const file = event.target.files[0];
-    if (file && file.type.startsWith('image/')) {
+    if (file && file.type.startsWith("image/")) {
       setWallpaperFile(file);
     }
   };
@@ -132,12 +147,12 @@ function Customization({
       {/* Packages Section */}
       <div className="bg-gray-800 rounded-lg p-6">
         <h3 className="text-xl text-white mb-4">Select Packages to Install</h3>
-        
+
         {Object.entries(availablePackages).map(([category, packages]) => (
           <div key={category} className="mb-6">
             <h4 className="text-lg text-gray-300 mb-2">{category}</h4>
             <div className="space-y-2 ml-4">
-              {packages.map(pkg => (
+              {packages.map((pkg) => (
                 <label key={pkg.id} className="flex items-center space-x-3">
                   <input
                     type="checkbox"
@@ -166,6 +181,7 @@ function CustomPage() {
   const [uploadWallpaper, setUploadWallpaper] = useState(false);
   const [wallpaperFile, setWallpaperFile] = useState(null);
   const [selectedPackages, setSelectedPackages] = useState([]);
+  const navigate = useNavigate();
 
   const handleOSSelection = (osName) => {
     setSelectedOS(osName);
@@ -177,9 +193,12 @@ function CustomPage() {
   };
 
   const getPredefinedSelection = () => {
-    const selectedRadio = document.querySelector('input[name="predefined"]:checked');
+    const selectedRadio = document.querySelector(
+      'input[name="predefined"]:checked'
+    );
     if (selectedRadio) {
-      return selectedRadio.parentElement.querySelector('.label-text').textContent;
+      return selectedRadio.parentElement.querySelector(".label-text")
+        .textContent;
     }
     return null;
   };
@@ -188,52 +207,44 @@ function CustomPage() {
     setLoading(true);
     setError(null);
 
-    // Create the base configuration object
     const configData = {
       operating_system: selectedOS,
       config_type: selectedOption,
       configuration: {
-        type: selectedOption === 'Predefined' ? getPredefinedSelection() : 'Custom',
+        type:
+          selectedOption === "Predefined" ? getPredefinedSelection() : "Custom",
         packages: selectedPackages,
-        has_custom_wallpaper: uploadWallpaper
-      }
+        has_custom_wallpaper: uploadWallpaper,
+      },
     };
 
-    // Log the configuration data
-    console.log('Submitting configuration:', JSON.stringify(configData, null, 2));
+    console.log(
+      "Submitting configuration:",
+      JSON.stringify(configData, null, 2)
+    );
 
     try {
-      let response;
       if (uploadWallpaper && wallpaperFile) {
         const formData = new FormData();
-        formData.append('wallpaper', wallpaperFile);
-        formData.append('config', JSON.stringify(configData));
-        
-        console.log('Uploading with wallpaper:', wallpaperFile.name);
-        response = await api.submitConfigurationWithWallpaper(formData);
-        console.log('Backend response:', JSON.stringify(response, null, 2));
-      } else {
-        // Regular JSON submission without wallpaper
-        response = await api.submitConfiguration(configData);
-        console.log('Backend response:', JSON.stringify(response, null, 2));
-      }
+        formData.append("wallpaper", wallpaperFile);
+        formData.append("config", JSON.stringify(configData));
 
-      // Check if the configuration type is Predefined and download_uri exists
-      if (configData.config_type === 'Predefined' && response.download_iso_url) {
-        // Trigger file download
-        window.location.href = response.download_iso_url;
+        console.log("Uploading with wallpaper:", wallpaperFile.name);
+        const response = await api.submitConfigurationWithWallpaper(formData);
+        console.log("Backend response:", JSON.stringify(response, null, 2));
       } else {
-        // Handle non-predefined configurations
-        alert('Configuration submitted successfully!');
+        const response = await api.submitConfiguration(configData);
+        console.log("Backend response:", JSON.stringify(response, null, 2));
       }
-
-    } catch (error) {
-      setError('Failed to submit configuration.');
-      console.error('Submission error:', error);
+      navigate('/waiting'); // Redirect to WaitingPage
+    } catch (err) {
+      setError("Failed to submit configuration");
+      console.error("Submission error:", err);
     } finally {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -242,14 +253,14 @@ function CustomPage() {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
-    <div className="flex flex-col items-center min-h-screen p-8">
-      <h1 className="text-3xl p-4 text-white">Select Operating System</h1>
-      
+    <div className="flex flex-col items-center min-h-screen">
+      <h1 className="text-3xl p-4 mb-4 text-white">Select Operating System</h1>
+
       {/* Fixed position for cards with consistent gap */}
       <div className="flex justify-center gap-20 w-full mb-8">
         <div className="card bg-gray-800 w-80 shadow-xl text-gray-200">
@@ -288,9 +299,7 @@ function CustomPage() {
           </figure>
           <div className="card-body">
             <h2 className="card-title">Arch Linux</h2>
-            <p>
-              Arch Linux is a lightweight and flexible Linux distribution.
-            </p>
+            <p>Arch Linux is a lightweight and flexible Linux distribution.</p>
             <div className="card-actions justify-end">
               <button
                 className={`btn ${
@@ -315,7 +324,10 @@ function CustomPage() {
             You have selected: <strong>{selectedOS}</strong>
           </h2>
 
-          <div className="dropdown relative flex flex-col items-center" ref={dropdownRef}>
+          <div
+            className="dropdown relative flex flex-col items-center"
+            ref={dropdownRef}
+          >
             <button
               className="btn w-52 bg-gray-700 text-gray-200 hover:bg-gray-600"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -347,7 +359,7 @@ function CustomPage() {
           <div className="w-full flex flex-col items-center">
             {selectedOption === "Predefined" && <Predefined />}
             {selectedOption === "Customization" && (
-              <Customization 
+              <Customization
                 uploadWallpaper={uploadWallpaper}
                 setUploadWallpaper={setUploadWallpaper}
                 wallpaperFile={wallpaperFile}
@@ -360,18 +372,16 @@ function CustomPage() {
 
           {selectedOption && (
             <>
-              <button 
+              <button
                 className={`btn w-52 mt-8 ${
-                  loading ? 'bg-gray-500' : 'bg-green-600 hover:bg-green-700'
+                  loading ? "bg-gray-500" : "bg-green-600 hover:bg-green-700"
                 } text-white`}
                 onClick={handleSubmit}
                 disabled={loading}
               >
-                {loading ? 'Submitting...' : 'Submit'}
+                {loading ? "Submitting..." : "Submit"}
               </button>
-              {error && (
-                <div className="text-red-500 mt-4">{error}</div>
-              )}
+              {error && <div className="text-red-500 mt-4">{error}</div>}
             </>
           )}
         </div>
