@@ -1,37 +1,33 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api';
-
+const API_BASE_URL = 'http://localhost:8080/api'; 
 const api = {
-  // Get predefined configurations
-  getPredefinedConfigs: async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/configurations/predefined/`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching predefined configs:', error);
-      throw error;
-    }
-  },
-
+ 
   // Submit OS configuration
   submitConfiguration: async (data) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/configurations/submit/`, data);
+      const response = await axios.post(`${API_BASE_URL}/configurations/submit`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       return response.data;
     } catch (error) {
       console.error('Error submitting configuration:', error);
       throw error;
     }
   },
-
-  // Get custom configuration options
-  getCustomOptions: async (osType) => {
+  
+  submitConfigurationWithWallpaper: async (formData) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/configurations/custom-options/${osType}/`);
+      const response = await axios.post(`${API_BASE_URL}/configurations/submit`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
       return response.data;
     } catch (error) {
-      console.error('Error fetching custom options:', error);
+      console.error('Error submitting configuration with wallpaper:', error);
       throw error;
     }
   }
