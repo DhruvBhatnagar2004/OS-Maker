@@ -53,13 +53,105 @@ function Predefined() {
   );
 }
 
-function Customization() {
+function Customization({
+  uploadWallpaper,
+  setUploadWallpaper,
+  wallpaperFile,
+  setWallpaperFile,
+  selectedPackages,
+  setSelectedPackages
+}) {
+  const availablePackages = {
+    'Development Tools': [
+      { id: 'git', name: 'Git - Version Control' },
+      { id: 'vscode', name: 'Visual Studio Code' },
+      { id: 'docker', name: 'Docker' },
+    ],
+    'Utilities': [
+      { id: 'firefox', name: 'Firefox Browser' },
+      { id: 'vlc', name: 'VLC Media Player' },
+      { id: 'terminal', name: 'Terminal Emulator' },
+    ],
+    'System Tools': [
+      { id: 'htop', name: 'Htop System Monitor' },
+      { id: 'firewall', name: 'Firewall Configuration' },
+      { id: 'backup', name: 'Backup Utility' },
+    ]
+  };
+
+  const handlePackageToggle = (packageId) => {
+    setSelectedPackages(prev => 
+      prev.includes(packageId) 
+        ? prev.filter(id => id !== packageId)
+        : [...prev, packageId]
+    );
+  };
+
+  const handleWallpaperChange = (event) => {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      setWallpaperFile(file);
+    }
+  };
+
   return (
-    <div className="mt-8 flex flex-col items-center">
+    <div className="mt-8 w-full max-w-3xl">
       <h2 className="text-2xl mb-6 text-white font-semibold text-center">
         Customize Your Configuration
       </h2>
-      <p className="text-gray-300 text-center">Please enter your customization details here.</p>
+
+      {/* Wallpaper Section */}
+      <div className="bg-gray-800 rounded-lg p-6 mb-6">
+        <label className="flex items-center space-x-3 text-white mb-4">
+          <input
+            type="checkbox"
+            checked={uploadWallpaper}
+            onChange={() => setUploadWallpaper(!uploadWallpaper)}
+            className="checkbox"
+          />
+          <span>Custom Wallpaper</span>
+        </label>
+
+        {uploadWallpaper && (
+          <div className="ml-7">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleWallpaperChange}
+              className="file-input file-input-bordered w-full max-w-xs text-white"
+            />
+            {wallpaperFile && (
+              <p className="text-green-400 mt-2">
+                Selected: {wallpaperFile.name}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Packages Section */}
+      <div className="bg-gray-800 rounded-lg p-6">
+        <h3 className="text-xl text-white mb-4">Select Packages to Install</h3>
+        
+        {Object.entries(availablePackages).map(([category, packages]) => (
+          <div key={category} className="mb-6">
+            <h4 className="text-lg text-gray-300 mb-2">{category}</h4>
+            <div className="space-y-2 ml-4">
+              {packages.map(pkg => (
+                <label key={pkg.id} className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedPackages.includes(pkg.id)}
+                    onChange={() => handlePackageToggle(pkg.id)}
+                    className="checkbox"
+                  />
+                  <span className="text-white">{pkg.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -71,6 +163,9 @@ function CustomPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const dropdownRef = useRef(null);
+  const [uploadWallpaper, setUploadWallpaper] = useState(false);
+  const [wallpaperFile, setWallpaperFile] = useState(null);
+  const [selectedPackages, setSelectedPackages] = useState([]);
 
   const handleOSSelection = (osName) => {
     setSelectedOS(osName);
@@ -93,23 +188,35 @@ function CustomPage() {
     setLoading(true);
     setError(null);
 
+    // Create the base configuration object
     const configData = {
       operating_system: selectedOS,
       config_type: selectedOption,
       configuration: {
         type: selectedOption === 'Predefined' ? getPredefinedSelection() : 'Custom',
-        // Add any custom configuration data here if needed
+        packages: selectedPackages,
+        has_custom_wallpaper: uploadWallpaper
       }
     };
 
-    // Add pretty console log
-    console.log('Sending configuration to backend:');
-    console.log(JSON.stringify(configData, null, 2));
+    // Log the configuration data
+    console.log('Submitting configuration:', JSON.stringify(configData, null, 2));
 
     try {
-      const response = await api.submitConfiguration(configData);
-      console.log('Backend response:', JSON.stringify(response, null, 2));
-      // Add success handling here (e.g., show success message, redirect)
+      // If wallpaper is selected, use FormData to send both file and config
+      if (uploadWallpaper && wallpaperFile) {
+        const formData = new FormData();
+        formData.append('wallpaper', wallpaperFile);
+        formData.append('config', JSON.stringify(configData));
+        
+        console.log('Uploading with wallpaper:', wallpaperFile.name);
+        const response = await api.submitConfigurationWithWallpaper(formData);
+        console.log('Backend response:', JSON.stringify(response, null, 2));
+      } else {
+        // Regular JSON submission without wallpaper
+        const response = await api.submitConfiguration(configData);
+        console.log('Backend response:', JSON.stringify(response, null, 2));
+      }
     } catch (err) {
       setError('Failed to submit configuration');
       console.error('Submission error:', err);
@@ -227,7 +334,16 @@ function CustomPage() {
 
           <div className="w-full flex flex-col items-center">
             {selectedOption === "Predefined" && <Predefined />}
-            {selectedOption === "Customization" && <Customization />}
+            {selectedOption === "Customization" && (
+              <Customization 
+                uploadWallpaper={uploadWallpaper}
+                setUploadWallpaper={setUploadWallpaper}
+                wallpaperFile={wallpaperFile}
+                setWallpaperFile={setWallpaperFile}
+                selectedPackages={selectedPackages}
+                setSelectedPackages={setSelectedPackages}
+              />
+            )}
           </div>
 
           {selectedOption && (
