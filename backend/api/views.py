@@ -12,9 +12,9 @@ from .models import OSConfiguration
 from .serializers import OSConfigurationSerializer
 from .services import ConfigurationService
 
-# Correct ISO path constant
-BASE_DIR = Path(settings.BASE_DIR)  # Changed from parent.parent to parent
-PREDEFINED_ISO_PATH = BASE_DIR / "project" / "iso" / "iso.txt"  # Added "OS_Maker" to the path
+# Define the base directory
+BASE_DIR = Path(settings.BASE_DIR)
+PREDEFINED_ISO_PATH = BASE_DIR / "project" / "iso" / "iso.txt"
 
 def serve_iso_file(iso_path):
     """Helper function to serve ISO file"""
@@ -28,7 +28,7 @@ def serve_iso_file(iso_path):
             return FileResponse(
                 open(iso_path, 'rb'),
                 as_attachment=True,
-                filename='iso.txt'  # You can set a more appropriate filename if needed
+                filename=iso_path.name
             )
         else:
             print(f"ISO file not found at: {iso_path_str}")
@@ -40,6 +40,7 @@ def serve_iso_file(iso_path):
 @api_view(['POST'])
 def submit_configuration(request):
     try:
+        # Parse incoming data
         if request.content_type.startswith('multipart/form-data'):
             config_data = json.loads(request.data.get('config'))
             wallpaper = request.FILES.get('wallpaper')
@@ -67,7 +68,7 @@ def submit_configuration(request):
         packages_str = '\n'.join(packages)
 
         # Define the path for packages.txt
-        packages_file_path = BASE_DIR / "project" / "packages.txt"
+        packages_file_path = BASE_DIR.parent / "project" / "packages.txt"
 
         # Write the packages to packages.txt
         with open(packages_file_path, 'w') as f:
@@ -75,49 +76,54 @@ def submit_configuration(request):
         print(f"Packages written to {packages_file_path}")
 
         # Upload packages.txt to Flask server
-        flask_url = f"http://{settings.FLASK_SERVER_IP}:{settings.FLASK_SERVER_PORT}/upload-package"
+        flask_upload_url = f"http://{settings.FLASK_SERVER_IP}:{settings.FLASK_SERVER_PORT}/upload-package"
         with open(packages_file_path, 'rb') as f:
             files = {'file': f}
-            response = requests.post(flask_url, files=files)
-        
-        if response.status_code != 200:
+            upload_response = requests.post(flask_upload_url, files=files)
+
+        if upload_response.status_code != 200:
             return Response(
                 {'error': 'Failed to upload packages to Flask server'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-        
-        # Execute run-script on Flask server based on operating_system
+        print("Packages uploaded to Flask server successfully.")
+
+        # Determine ISO generation endpoint and set filename with .iso extension
         if os_type.lower() == 'ubuntu':
-            generate_iso_url = f"http://{settings.FLASK_SERVER_IP}:{settings.FLASK_SERVER_PORT}/generate-iso/ubuntu"
-            default_output_name = 'custom-ubuntu.iso'
+            generate_iso_endpoint = 'ubuntu'
+            default_output_name = 'custom-ubuntu'
         elif os_type.lower() == 'arch':
-            generate_iso_url = f"http://{settings.FLASK_SERVER_IP}:{settings.FLASK_SERVER_PORT}/generate-iso/arch"
-            default_output_name = 'custom-arch.iso'
+            generate_iso_endpoint = 'arch'
+            default_output_name = 'custom-arch'
         else:
             return Response(
                 {'error': 'Unsupported operating system for ISO generation'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        # Construct the Flask ISO generation URL
+        generate_iso_url = f"http://{settings.FLASK_SERVER_IP}:{settings.FLASK_SERVER_PORT}/generate-iso/{generate_iso_endpoint}"
+
         # Prepare payload for ISO generation
         payload = {
             'output_name': default_output_name,
-            'wallpaper_path': config_data.get('wallpaper_path')
+            'wallpaper_path': config_data.get('wallpaper_path')  # Ensure this path is valid on the Flask server
         }
 
         # Send request to Flask server to generate ISO
         iso_response = requests.post(generate_iso_url, json=payload)
 
         if iso_response.status_code != 200:
+            error_msg = iso_response.json().get('error', 'Unknown error during ISO generation')
             return Response(
-                {'error': f"Failed to generate ISO: {iso_response.json().get('error', 'Unknown error')}" },
+                {'error': f"Failed to generate ISO: {error_msg}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-        
+
         iso_message = iso_response.json().get('message', '')
         print(f"ISO Generation Response: {iso_message}")
 
-        # Prepare data for saving
+        # Prepare data for saving in the database
         save_data = {
             'operating_system': os_type,
             'config_type': config_type,
@@ -133,6 +139,9 @@ def submit_configuration(request):
         if serializer.is_valid():
             instance = serializer.save()
             
+            # Construct the Flask download ISO URL
+            download_iso_url = f"http://{settings.FLASK_SERVER_IP}:{settings.FLASK_SERVER_PORT}/download-iso/{generate_iso_endpoint}/{default_output_name}"
+            
             response_data = {
                 'operating_system': os_type,
                 'config_type': config_type,
@@ -141,15 +150,9 @@ def submit_configuration(request):
                     'packages': packages,
                     'has_custom_wallpaper': configuration.get('has_custom_wallpaper', False)
                 },
-                'iso_generation': iso_message
+                'iso_generation': iso_message,
+                'download_iso_url': download_iso_url  # Direct link to Flask's download endpoint
             }
-            
-            if config_type == 'Predefined':
-                # Generate download URL
-                download_url = request.build_absolute_uri(
-                    reverse('download_iso', args=[instance.id])
-                )
-                response_data['download_iso_url'] = download_url
 
             return Response(response_data, status=status.HTTP_201_CREATED)
             
