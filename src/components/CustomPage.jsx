@@ -1,5 +1,6 @@
 // CustomPage.jsx
 import React, { useState, useRef, useEffect } from "react";
+import axios from "axios";
 import api from "../services/api";
 
 function Predefined() {
@@ -171,7 +172,7 @@ function Customization({
   );
 }
 
-function CustomPage() {
+const CustomPage = () => {
   const [selectedOS, setSelectedOS] = useState("");
   const [selectedOption, setSelectedOption] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -412,6 +413,6 @@ function CustomPage() {
       )}
     </div>
   );
-}
+};
 
 export default CustomPage;
