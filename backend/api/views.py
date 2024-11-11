@@ -39,7 +39,7 @@ def serve_iso_file(iso_path):
 @api_view(['POST'])
 def submit_configuration(request):
     try:
-        if request.content_type == 'multipart/form-data':
+        if request.content_type.startswith('multipart/form-data'):
             config_data = json.loads(request.data.get('config'))
             wallpaper = request.FILES.get('wallpaper')
         else:
@@ -61,6 +61,17 @@ def submit_configuration(request):
             packages = ConfigurationService.customized_service(
                 configuration.get('packages', [])
             )
+
+        # Convert packages list to string (one package per line)
+        packages_str = '\n'.join(packages)
+
+        # Define the path for packages.txt
+        packages_file_path = BASE_DIR / "project" / "packages.txt"
+
+        # Write the packages to packages.txt
+        with open(packages_file_path, 'w') as f:
+            f.write(packages_str)
+        print(f"Packages written to {packages_file_path}")
 
         # Prepare data for saving
         save_data = {
