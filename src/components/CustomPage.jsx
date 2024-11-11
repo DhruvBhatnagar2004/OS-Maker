@@ -1,7 +1,9 @@
 // CustomPage.jsx
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Add this line
 import axios from "axios";
 import api from "../services/api";
+import LoadingModal from './LoadingModal';
 
 function Predefined() {
   return (
@@ -173,6 +175,7 @@ function Customization({
 }
 
 const CustomPage = () => {
+  const navigate = useNavigate(); // Add this line
   const [selectedOS, setSelectedOS] = useState("");
   const [selectedOption, setSelectedOption] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -182,6 +185,7 @@ const CustomPage = () => {
   const [uploadWallpaper, setUploadWallpaper] = useState(false);
   const [wallpaperFile, setWallpaperFile] = useState(null);
   const [selectedPackages, setSelectedPackages] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleOSSelection = (osName) => {
     setSelectedOS(osName);
@@ -204,72 +208,46 @@ const CustomPage = () => {
   };
 
   const handleSubmit = async () => {
-    // Validation: If "Customization" is selected and "Upload Wallpaper" is checked,
-    // ensure a wallpaper file is uploaded.
-    if (
-      selectedOption === "Customization" &&
-      uploadWallpaper &&
-      !wallpaperFile
-    ) {
+    if (selectedOption === "Customization" && uploadWallpaper && !wallpaperFile) {
       alert("Please upload a wallpaper before submitting.");
       return;
     }
-
-    setLoading(true);
+  
+    setIsSubmitting(true);
     setError(null);
-
-    // Create the base configuration object
+  
     const configData = {
       operating_system: selectedOS,
       config_type: selectedOption,
       configuration: {
-        type:
-          selectedOption === "Predefined" ? getPredefinedSelection() : "Custom",
+        type: selectedOption === "Predefined" ? getPredefinedSelection() : "Custom",
         packages: selectedPackages,
         has_custom_wallpaper: uploadWallpaper,
+        wallpaper_path: wallpaperFile ? wallpaperFile.name : null // Add wallpaper path
       },
     };
-
-    // Log the configuration data
-    console.log(
-      "Submitting configuration:",
-      JSON.stringify(configData, null, 2)
-    );
-
+  
     try {
       let response;
       if (uploadWallpaper && wallpaperFile) {
         const formData = new FormData();
         formData.append("wallpaper", wallpaperFile);
         formData.append("config", JSON.stringify(configData));
-
-        console.log("Uploading with wallpaper:", wallpaperFile.name);
         response = await api.submitConfigurationWithWallpaper(formData);
-        console.log("Backend response:", JSON.stringify(response, null, 2));
       } else {
-        // Regular JSON submission without wallpaper
         response = await api.submitConfiguration(configData);
-        console.log("Backend response:", JSON.stringify(response, null, 2));
       }
-
-      // Check if the configuration type is Predefined and download_uri exists
-      if (
-        configData.config_type === "Predefined" &&
-        response.download_iso_url
-      ) {
-        // Trigger file download
-        window.location.href = response.download_iso_url;
-      } else {
-        // Handle non-predefined configurations
-        alert("Configuration submitted successfully!");
-      }
+  
+      window.location.href = response.download_iso_url;
+  
     } catch (error) {
       setError("Failed to submit configuration.");
       console.error("Submission error:", error);
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
+  
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -411,6 +389,11 @@ const CustomPage = () => {
           )}
         </div>
       )}
+      <LoadingModal 
+        isSubmitting={isSubmitting}
+        error={error}
+        setIsSubmitting={setIsSubmitting}
+      />
     </div>
   );
 };

@@ -44,7 +44,41 @@ def submit_configuration(request):
         if request.content_type.startswith('multipart/form-data'):
             config_data = json.loads(request.data.get('config'))
             wallpaper = request.FILES.get('wallpaper')
+            wallpaper_path = None
+            print("Checking wallpaper")
+            
+            # Handle wallpaper upload
+            if wallpaper:
+                print(f"Wallpaper received: {wallpaper.name}")
+                
+                # Create wallpaper directory if it doesn't exist
+                wallpaper_dir = BASE_DIR.parent / "project" / "wallpaper"
+                wallpaper_dir.mkdir(parents=True, exist_ok=True)
+                
+                # Save wallpaper locally
+                wallpaper_path = wallpaper_dir / wallpaper.name
+                with open(wallpaper_path, 'wb') as f:
+                    for chunk in wallpaper.chunks():
+                        f.write(chunk)
+                print(f"Wallpaper written to {wallpaper_path}")
+
+                # Upload to Flask server
+                flask_upload_wallpaper = f"http://{settings.FLASK_SERVER_IP}:{settings.FLASK_SERVER_PORT}/upload-wallpaper"
+                with open(wallpaper_path, 'rb') as f:
+                    files = {'file': f}
+                    upload_wallpaper_response = requests.post(flask_upload_wallpaper, files=files)
+
+                if upload_wallpaper_response.status_code != 200:
+                    return Response(
+                        {'error': 'Failed to upload wallpaper to Flask server'},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+                print("Wallpaper uploaded to Flask server successfully.")
+                
+                # Update config data with wallpaper path
+                config_data['configuration']['wallpaper_path'] = str(wallpaper_path)
         else:
+            print("No wallpaper")
             config_data = request.data
             wallpaper = None
 
@@ -104,7 +138,6 @@ def submit_configuration(request):
         # Construct the Flask ISO generation URL
         generate_iso_url = f"http://{settings.FLASK_SERVER_IP}:{settings.FLASK_SERVER_PORT}/generate-iso/{generate_iso_endpoint}"
 
-        # Prepare payload for ISO generation
         payload = {
             'output_name': default_output_name,
             'wallpaper_path': config_data.get('wallpaper_path')  # Ensure this path is valid on the Flask server
@@ -132,16 +165,15 @@ def submit_configuration(request):
             'has_custom_wallpaper': configuration.get('has_custom_wallpaper', False)
         }
 
-        if wallpaper:
-            save_data['wallpaper'] = wallpaper
 
         serializer = OSConfigurationSerializer(data=save_data)
         if serializer.is_valid():
+            print("in fi")
             instance = serializer.save()
+            print("before`")
             
-            # Construct the Flask download ISO URL
-            download_iso_url = f"http://{settings.FLASK_SERVER_IP}:{settings.FLASK_SERVER_PORT}/download-iso/{generate_iso_endpoint}/{default_output_name}"
-            
+            download_iso_url = f"http://{settings.FLASK_SERVER_IP}:{settings.FLASK_SERVER_PORT}/download-iso/{generate_iso_endpoint}/{default_output_name}.iso"
+            print("after")
             response_data = {
                 'operating_system': os_type,
                 'config_type': config_type,
@@ -150,11 +182,15 @@ def submit_configuration(request):
                     'packages': packages,
                     'has_custom_wallpaper': configuration.get('has_custom_wallpaper', False)
                 },
-                'iso_generation': iso_message,
+                'iso_generation': "iso_message",
                 'download_iso_url': download_iso_url  # Direct link to Flask's download endpoint
             }
+            print(response_data)
 
             return Response(response_data, status=status.HTTP_201_CREATED)
+        else:
+            print("not valid")
+            print(serializer.errors)
             
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
