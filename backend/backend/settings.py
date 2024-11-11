@@ -12,11 +12,15 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+FLASK_SERVER_IP = os.getenv('FLASK_SERVER_IP', '127.0.0.1')
+FLASK_SERVER_PORT = os.getenv('FLASK_SERVER_PORT', '5000')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 

@@ -1,5 +1,6 @@
 import os
 import json
+import requests
 from pathlib import Path
 from django.http import FileResponse, HttpResponse
 from django.conf import settings
@@ -12,7 +13,7 @@ from .serializers import OSConfigurationSerializer
 from .services import ConfigurationService
 
 # Correct ISO path constant
-BASE_DIR = Path(settings.BASE_DIR).parent  # Changed from parent.parent to parent
+BASE_DIR = Path(settings.BASE_DIR)  # Changed from parent.parent to parent
 PREDEFINED_ISO_PATH = BASE_DIR / "project" / "iso" / "iso.txt"  # Added "OS_Maker" to the path
 
 def serve_iso_file(iso_path):
@@ -73,6 +74,49 @@ def submit_configuration(request):
             f.write(packages_str)
         print(f"Packages written to {packages_file_path}")
 
+        # Upload packages.txt to Flask server
+        flask_url = f"http://{settings.FLASK_SERVER_IP}:{settings.FLASK_SERVER_PORT}/upload-package"
+        with open(packages_file_path, 'rb') as f:
+            files = {'file': f}
+            response = requests.post(flask_url, files=files)
+        
+        if response.status_code != 200:
+            return Response(
+                {'error': 'Failed to upload packages to Flask server'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+        # Execute run-script on Flask server based on operating_system
+        if os_type.lower() == 'ubuntu':
+            generate_iso_url = f"http://{settings.FLASK_SERVER_IP}:{settings.FLASK_SERVER_PORT}/generate-iso/ubuntu"
+            default_output_name = 'custom-ubuntu.iso'
+        elif os_type.lower() == 'arch':
+            generate_iso_url = f"http://{settings.FLASK_SERVER_IP}:{settings.FLASK_SERVER_PORT}/generate-iso/arch"
+            default_output_name = 'custom-arch.iso'
+        else:
+            return Response(
+                {'error': 'Unsupported operating system for ISO generation'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Prepare payload for ISO generation
+        payload = {
+            'output_name': default_output_name,
+            'wallpaper_path': config_data.get('wallpaper_path')
+        }
+
+        # Send request to Flask server to generate ISO
+        iso_response = requests.post(generate_iso_url, json=payload)
+
+        if iso_response.status_code != 200:
+            return Response(
+                {'error': f"Failed to generate ISO: {iso_response.json().get('error', 'Unknown error')}" },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+        iso_message = iso_response.json().get('message', '')
+        print(f"ISO Generation Response: {iso_message}")
+
         # Prepare data for saving
         save_data = {
             'operating_system': os_type,
@@ -96,7 +140,8 @@ def submit_configuration(request):
                     'type': configuration.get('type'),
                     'packages': packages,
                     'has_custom_wallpaper': configuration.get('has_custom_wallpaper', False)
-                }
+                },
+                'iso_generation': iso_message
             }
             
             if config_type == 'Predefined':
