@@ -67,7 +67,7 @@ def submit_configuration(request):
         packages_str = '\n'.join(packages)
 
         # Define the path for packages.txt
-        packages_file_path = BASE_DIR / "project" / "packages.txt"
+        packages_file_path = BASE_DIR.parent / "project" / "packages.txt"
 
         # Write the packages to packages.txt
         with open(packages_file_path, 'w') as f:

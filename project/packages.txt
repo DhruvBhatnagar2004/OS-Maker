@@ -1,3 +1,2 @@
-vscode
-vlc
-firewall
+git
+firefox
