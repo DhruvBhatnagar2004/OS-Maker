@@ -1,70 +1,67 @@
-# Getting Started with Create React App
+# OS Maker
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+OS Maker is a web application that allows users to customize and generate personalized OS distributions, such as Ubuntu and Arch Linux.
 
-## Available Scripts
+## Technologies Used
 
-In the project directory, you can run:
+- **Frontend**: React.js
+- **Backend**: Django
+- **OS Manipulation**: Shell Scripts
 
-### `npm start`
+## Package Installations
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+The project requires the following packages to be installed:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+1. **Frontend**:
+   - `react`
+   - `react-dom`
+   - `axios`
+   - `tailwindcss`
+   - `lucide-react`
+   - `recharts`
+   - `@shadcn/ui`
+   - `lodash`
 
-### `npm test`
+2. **Backend**:
+   - `django`
+   - `djangorestframework`
+   - `requests`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## User Interface (UI)
 
-### `npm run build`
+The user interface of OS Maker consists of the following screens:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. **OS Selection**: This screen allows the user to select the operating system they want to customize, such as Ubuntu or Arch Linux.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+![OS Selection Screen]()
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+2. **Configuration Options**: This screen presents the user with two options: "Predefined" and "Customization". The user can choose the configuration they want to use.
 
-### `npm run eject`
+![Configuration Options Screen]()
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+3. **Predefined Configuration**: If the user selects the "Predefined" option, they will see a set of pre-defined configurations, such as "Minimal", "Standard", and "RAM-Efficient".
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+![Predefined Configuration Screen]()
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+4. **Customization**: If the user selects the "Customization" option, they will be able to choose a custom wallpaper and select additional packages to be installed.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+![Customization Screen]()
 
-## Learn More
+5. **Submission**: After configuring the OS, the user can submit their selection. For "Predefined" configurations, the user will be able to download the generated ISO file. For "Customization" configurations, the user will receive a confirmation message.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+![Submission Screen]()
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Backend Implementation
 
-### Code Splitting
+The backend of OS Maker is implemented using Django, a popular Python web framework. The key features of the backend include:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+1. **Configuration Submission**: The backend provides an API endpoint to handle the submission of OS configurations, both predefined and customized.
+2. **Packages Management**: The backend is responsible for managing the package installation process, including writing the packages to a file and uploading it to a Flask server for further processing.
+3. **ISO Generation**: The backend communicates with a Flask server to generate the ISO file based on the user's selected configuration.
+4. **ISO Download**: For predefined configurations, the backend provides an API endpoint to download the generated ISO file.
 
-### Analyzing the Bundle Size
+The backend code can be found in the `views.py` file of the Django project.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Conclusion
 
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+OS Maker is a web application that allows users to customize and generate personalized OS distributions. It leverages the power of React.js for the frontend, Django for the backend, and shell scripts for OS manipulation. The application provides a user-friendly interface and a comprehensive set of configuration options to cater to the diverse needs of users.
