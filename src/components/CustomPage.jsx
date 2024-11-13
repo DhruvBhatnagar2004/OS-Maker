@@ -4,72 +4,73 @@ import { useNavigate } from "react-router-dom"; // Add this line
 import axios from "axios";
 import api from "../services/api";
 import LoadingModal from './LoadingModal';
+import PredefinedConfig from './PredefinedConfig';
 
-function Predefined() {
-  return (
-    <div className="mt-8 rounded-lg p-6 flex flex-col items-center">
-      <h2 className="text-2xl mb-6 text-white font-semibold text-center">
-        Predefined Configurations
-      </h2>
-      <div className="flex space-x-4 justify-center">
-        <div className="form-control bg-gray-700 p-3 rounded-lg hover:bg-gray-600 transition-colors w-64">
-          <label className="label cursor-pointer flex justify-between items-center">
-            <div>
-              <span className="label-text text-white text-lg font-medium">
-                Minimal
-              </span>
-              <p className="text-gray-300 text-sm mt-1">
-                Basic system with essential packages only
-              </p>
-            </div>
-            <input
-              type="radio"
-              name="predefined"
-              className="radio checked:bg-red-500 w-5 h-5"
-              defaultChecked
-            />
-          </label>
-        </div>
+// function Predefined() {
+//   return (
+//     <div className="mt-8 rounded-lg p-6 flex flex-col items-center">
+//       <h2 className="text-2xl mb-6 text-white font-semibold text-center">
+//         Predefined Configurations
+//       </h2>
+//       <div className="flex space-x-4 justify-center">
+//         <div className="form-control bg-gray-700 p-3 rounded-lg hover:bg-gray-600 transition-colors w-64">
+//           <label className="label cursor-pointer flex justify-between items-center">
+//             <div>
+//               <span className="label-text text-white text-lg font-medium">
+//                 Minimal
+//               </span>
+//               <p className="text-gray-300 text-sm mt-1">
+//                 Basic system with essential packages only
+//               </p>
+//             </div>
+//             <input
+//               type="radio"
+//               name="predefined"
+//               className="radio checked:bg-red-500 w-5 h-5"
+//               defaultChecked
+//             />
+//           </label>
+//         </div>
 
-        <div className="form-control bg-gray-700 p-3 rounded-lg hover:bg-gray-600 transition-colors w-64">
-          <label className="label cursor-pointer flex justify-between items-center">
-            <div>
-              <span className="label-text text-white text-lg font-medium">
-                Standard
-              </span>
-              <p className="text-gray-300 text-sm mt-1">
-                Balanced configuration for daily use
-              </p>
-            </div>
-            <input
-              type="radio"
-              name="predefined"
-              className="radio checked:bg-blue-500 w-5 h-5"
-            />
-          </label>
-        </div>
+//         <div className="form-control bg-gray-700 p-3 rounded-lg hover:bg-gray-600 transition-colors w-64">
+//           <label className="label cursor-pointer flex justify-between items-center">
+//             <div>
+//               <span className="label-text text-white text-lg font-medium">
+//                 Standard
+//               </span>
+//               <p className="text-gray-300 text-sm mt-1">
+//                 Balanced configuration for daily use
+//               </p>
+//             </div>
+//             <input
+//               type="radio"
+//               name="predefined"
+//               className="radio checked:bg-blue-500 w-5 h-5"
+//             />
+//           </label>
+//         </div>
 
-        <div className="form-control bg-gray-700 p-3 rounded-lg hover:bg-gray-600 transition-colors w-64">
-          <label className="label cursor-pointer flex justify-between items-center">
-            <div>
-              <span className="label-text text-white text-lg font-medium">
-                RAM-Efficient
-              </span>
-              <p className="text-gray-300 text-sm mt-1">
-                Optimized for systems with limited memory
-              </p>
-            </div>
-            <input
-              type="radio"
-              name="predefined"
-              className="radio checked:bg-violet-500 w-5 h-5"
-            />
-          </label>
-        </div>
-      </div>
-    </div>
-  );
-}
+//         <div className="form-control bg-gray-700 p-3 rounded-lg hover:bg-gray-600 transition-colors w-64">
+//           <label className="label cursor-pointer flex justify-between items-center">
+//             <div>
+//               <span className="label-text text-white text-lg font-medium">
+//                 Workstation
+//               </span>
+//               <p className="text-gray-300 text-sm mt-1">
+//                 Development environment with tools and utilities
+//               </p>
+//             </div>
+//             <input
+//               type="radio"
+//               name="predefined"
+//               className="radio checked:bg-violet-500 w-5 h-5"
+//             />
+//           </label>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
 
 function Customization({
   uploadWallpaper,
@@ -82,19 +83,79 @@ function Customization({
   const availablePackages = {
     "Development Tools": [
       { id: "git", name: "Git - Version Control" },
-      { id: "vscode", name: "Visual Studio Code" },
+      { id: "code", name: "Visual Studio Code" },
       { id: "docker", name: "Docker" },
+      { id: "build-essential", name: "Build Essential - Compilation Tools" },
+      { id: "python3", name: "Python 3" },
+      { id: "nodejs", name: "Node.js" },
+      { id: "openjdk-17-jdk", name: "Java Development Kit" },
+      { id: "cmake", name: "CMake - Build System" },
+      { id: "php", name: "PHP" },
+      { id: "ruby", name: "Ruby" }
     ],
-    Utilities: [
-      { id: "firefox", name: "Firefox Browser" },
+    "Media & Graphics": [
       { id: "vlc", name: "VLC Media Player" },
-      { id: "terminal", name: "Terminal Emulator" },
+      { id: "gimp", name: "GIMP - Image Editor" },
+      { id: "inkscape", name: "Inkscape - Vector Graphics" },
+      { id: "kdenlive", name: "Kdenlive - Video Editor" },
+      { id: "obs-studio", name: "OBS Studio - Screen Recorder" },
+      { id: "audacity", name: "Audacity - Audio Editor" },
+      { id: "krita", name: "Krita - Digital Painting" },
+      { id: "darktable", name: "Darktable - Photo Workflow" }
     ],
     "System Tools": [
-      { id: "htop", name: "Htop System Monitor" },
-      { id: "firewall", name: "Firewall Configuration" },
-      { id: "backup", name: "Backup Utility" },
+      { id: "htop", name: "Htop - System Monitor" },
+      { id: "gufw", name: "Firewall Configuration" },
+      { id: "timeshift", name: "Timeshift - System Backup" },
+      { id: "gparted", name: "GParted - Partition Editor" },
+      { id: "bleachbit", name: "BleachBit - System Cleaner" },
+      { id: "neofetch", name: "Neofetch - System Info" },
+      { id: "hardinfo", name: "HardInfo - Hardware Info" },
+      { id: "tlp", name: "TLP - Power Management" }
     ],
+    "Internet & Network": [
+      { id: "firefox", name: "Firefox Web Browser" },
+      { id: "chromium-browser", name: "Chromium Browser" },
+      { id: "filezilla", name: "FileZilla - FTP Client" },
+      { id: "thunderbird", name: "Thunderbird Email Client" },
+      { id: "remmina", name: "Remmina - Remote Desktop" },
+      { id: "transmission", name: "Transmission - Torrent Client" },
+      { id: "curl", name: "cURL - Data Transfer" },
+      { id: "wireguard", name: "WireGuard VPN" }
+    ],
+    "Office & Productivity": [
+      { id: "libreoffice", name: "LibreOffice Suite" },
+      { id: "evince", name: "Evince - PDF Viewer" },
+      { id: "simple-scan", name: "Document Scanner" },
+      { id: "keepassxc", name: "KeePassXC - Password Manager" },
+      { id: "gnome-calendar", name: "GNOME Calendar" },
+      { id: "zotero", name: "Zotero - Reference Manager" },
+      { id: "planner", name: "Planner - Project Management" }
+    ],
+    "Gaming": [
+      { id: "steam", name: "Steam - Gaming Platform" },
+      { id: "lutris", name: "Lutris - Game Manager" },
+      { id: "wine", name: "Wine - Windows Compatibility" },
+      { id: "gamemode", name: "GameMode - Gaming Performance" },
+      { id: "dosbox", name: "DOSBox - DOS Emulator" },
+      { id: "retroarch", name: "RetroArch - Retro Gaming" }
+    ],
+    "Security Tools": [
+      { id: "clamav", name: "ClamAV - Antivirus" },
+      { id: "fail2ban", name: "Fail2ban - Intrusion Prevention" },
+      { id: "rkhunter", name: "RKHunter - Rootkit Detection" },
+      { id: "gnupg", name: "GnuPG - Encryption" },
+      { id: "ufw", name: "UFW - Firewall" },
+      { id: "cryptsetup", name: "Cryptsetup - Disk Encryption" }
+    ],
+    "Education": [
+      { id: "gcompris", name: "GCompris - Educational Suite" },
+      { id: "stellarium", name: "Stellarium - Astronomy" },
+      { id: "octave", name: "Octave - Scientific Computing" },
+      { id: "scratch", name: "Scratch - Programming for Kids" },
+      { id: "celestia", name: "Celestia - Space Simulator" },
+      { id: "kalzium", name: "Kalzium - Chemistry Tools" }
+    ]
   };
 
   const handlePackageToggle = (packageId) => {
@@ -151,24 +212,26 @@ function Customization({
       <div className="bg-gray-800 rounded-lg p-6">
         <h3 className="text-xl text-white mb-4">Select Packages to Install</h3>
 
-        {Object.entries(availablePackages).map(([category, packages]) => (
-          <div key={category} className="mb-6">
-            <h4 className="text-lg text-gray-300 mb-2">{category}</h4>
-            <div className="space-y-2 ml-4">
-              {packages.map((pkg) => (
-                <label key={pkg.id} className="flex items-center space-x-3">
-                  <input
-                    type="checkbox"
-                    checked={selectedPackages.includes(pkg.id)}
-                    onChange={() => handlePackageToggle(pkg.id)}
-                    className="checkbox"
-                  />
-                  <span className="text-white">{pkg.name}</span>
-                </label>
-              ))}
+        <div className="grid grid-cols-2 gap-x-8 gap-y-4 max-h-[600px] overflow-y-auto pr-4">
+          {Object.entries(availablePackages).map(([category, packages]) => (
+            <div key={category} className="bg-gray-700 p-4 rounded-lg">
+              <h4 className="text-lg text-gray-300 mb-3 font-medium">{category}</h4>
+              <div className="space-y-2">
+                {packages.map((pkg) => (
+                  <label key={pkg.id} className="flex items-center space-x-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedPackages.includes(pkg.id)}
+                      onChange={() => handlePackageToggle(pkg.id)}
+                      className="checkbox"
+                    />
+                    <span className="text-white text-sm">{pkg.name}</span>
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -310,8 +373,8 @@ const CustomPage = () => {
                     ? "bg-gray-400 hover:bg-gray-400 cursor-not-allowed opacity-70"
                     : "bg-blue-600 hover:bg-blue-700"
                 } text-white`}
-                onClick={() => handleOSSelection("Arch Linux")}
-                disabled={selectedOS === "Arch Linux"}
+                onClick={() => handleOSSelection("arch")}
+                disabled={selectedOS === "arch"}
               >
                 {selectedOS === "Arch Linux" ? "Selected" : "Select"}
               </button>
@@ -360,18 +423,19 @@ const CustomPage = () => {
           </div>
 
           <div className="w-full flex flex-col items-center">
-            {selectedOption === "Predefined" && <Predefined />}
-            {selectedOption === "Customization" && (
-              <Customization
-                uploadWallpaper={uploadWallpaper}
-                setUploadWallpaper={setUploadWallpaper}
-                wallpaperFile={wallpaperFile}
-                setWallpaperFile={setWallpaperFile}
-                selectedPackages={selectedPackages}
-                setSelectedPackages={setSelectedPackages}
-              />
-            )}
-          </div>
+        {selectedOption === "Predefined" ? (
+          <PredefinedConfig />
+        ) : selectedOption === "Customization" && (
+          <Customization
+            uploadWallpaper={uploadWallpaper}
+            setUploadWallpaper={setUploadWallpaper}
+            wallpaperFile={wallpaperFile}
+            setWallpaperFile={setWallpaperFile}
+            selectedPackages={selectedPackages}
+            setSelectedPackages={setSelectedPackages}
+          />
+        )}
+      </div>
 
           {selectedOption && (
             <>
@@ -393,6 +457,7 @@ const CustomPage = () => {
         isSubmitting={isSubmitting}
         error={error}
         setIsSubmitting={setIsSubmitting}
+        configType={selectedOption}  // Add this line
       />
     </div>
   );

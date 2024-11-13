@@ -1,10 +1,10 @@
 // LoadingModal.jsx
 import React, { useState, useEffect } from 'react';
 
-const LoadingModal = ({ isSubmitting, error, setIsSubmitting }) => {
+const LoadingModal = ({ isSubmitting, error, setIsSubmitting, configType }) => {
   const [currentStatus, setCurrentStatus] = useState(0);
 
-  const statusMessages = [
+  const customStatusMessages = [
     "Extracting the ISO file...",
     "Installing selected packages...",
     "Zipping the new filesystem...",
@@ -12,13 +12,33 @@ const LoadingModal = ({ isSubmitting, error, setIsSubmitting }) => {
     "Validating ISO file..."
   ];
 
-  const timeouts = [
+  const predefinedStatusMessages = [
+    "Preparing predefined configuration...",
+    "Generating ISO file...",
+    "Validating ISO file..."
+  ];
+
+  const customTimeouts = [
     15000,  // 15 seconds
     30000,  // 30 seconds
     30000,  // 30 seconds
     120000, // 120 seconds
     Infinity // Forever until download
   ];
+
+  const predefinedTimeouts = [
+    10000,  // 10 seconds
+    120000, // 120 seconds
+    Infinity // Forever until download
+  ];
+
+  const statusMessages = configType === "Predefined" 
+    ? predefinedStatusMessages 
+    : customStatusMessages;
+
+  const timeouts = configType === "Predefined"
+    ? predefinedTimeouts
+    : customTimeouts;
 
   // Reset currentStatus when modal is opened
   useEffect(() => {
@@ -36,7 +56,7 @@ const LoadingModal = ({ isSubmitting, error, setIsSubmitting }) => {
       
       return () => clearTimeout(timer);
     }
-  }, [isSubmitting, currentStatus]);
+  }, [isSubmitting, currentStatus, statusMessages.length, timeouts]);
 
   if (!isSubmitting) return null;
 
@@ -44,7 +64,9 @@ const LoadingModal = ({ isSubmitting, error, setIsSubmitting }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-gray-800 rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
         <h2 className="text-2xl text-white font-semibold text-center mb-6">
-          Generating Your Custom ISO
+          {configType === "Predefined" 
+            ? "Generating Predefined ISO"
+            : "Generating Your Custom ISO"}
         </h2>
         
         {/* Loading animation */}

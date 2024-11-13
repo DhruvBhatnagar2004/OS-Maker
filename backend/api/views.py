@@ -40,43 +40,94 @@ def serve_iso_file(iso_path):
 @api_view(['POST'])
 def submit_configuration(request):
     try:
-        # Parse incoming data
+        # Parse incoming data and get wallpaper if present
+        wallpaper = None
         if request.content_type.startswith('multipart/form-data'):
             config_data = json.loads(request.data.get('config'))
             wallpaper = request.FILES.get('wallpaper')
-            wallpaper_path = None
-            print("Checking wallpaper")
+        else:
+            config_data = request.data
+
+        # Extract configuration details
+        os_type = config_data.get('operating_system')
+        config_type = config_data.get('config_type')
+        configuration = config_data.get('configuration', {})
+
+        print(f"Received config_data: {config_data}")
+
+        # Handle Predefined configuration differently
+        if config_type == 'Predefined':
+            predefined_type = configuration.get('type', '').lower()
+            print(f"Processing predefined configuration type: {predefined_type}")
+
+            # Map predefined types to ISO filenames
+            iso_filename_map = {
+                'minimal': 'minimal.iso',
+                'standard': 'standard.iso',
+                'workstation': 'full.iso',  # for Ubuntu
+                'full': 'full.iso',
+                'base': 'base.iso',         # for Arch
+                'desktop': 'desktop.iso',
+                'gaming': 'gaming.iso'
+            }
+
+            # Get distro name in lowercase
+            distro = os_type.lower()
             
-            # Handle wallpaper upload
-            if wallpaper:
-                print(f"Wallpaper received: {wallpaper.name}")
-                
-                # Create wallpaper directory if it doesn't exist
-                wallpaper_dir = BASE_DIR.parent / "project" / "wallpaper"
-                wallpaper_dir.mkdir(parents=True, exist_ok=True)
-                
-                # Save wallpaper locally
-                wallpaper_path = wallpaper_dir / wallpaper.name
-                with open(wallpaper_path, 'wb') as f:
-                    for chunk in wallpaper.chunks():
-                        f.write(chunk)
-                print(f"Wallpaper written to {wallpaper_path}")
+            # Get corresponding ISO filename
+            iso_filename = iso_filename_map.get(predefined_type.lower())
+            if not iso_filename:
+                return Response(
+                    {'error': f'Invalid predefined configuration type: {predefined_type}'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
-                # Upload to Flask server
-                flask_upload_wallpaper = f"http://{settings.FLASK_SERVER_IP}:{settings.FLASK_SERVER_PORT}/upload-wallpaper"
-                with open(wallpaper_path, 'rb') as f:
-                    files = {'file': f}
-                    upload_wallpaper_response = requests.post(flask_upload_wallpaper, files=files)
+            # Direct download URL for predefined ISOs
+            download_iso_url = f"http://{settings.FLASK_SERVER_IP}:{settings.FLASK_SERVER_PORT}/download-iso/predefined/{distro}/{iso_filename}"
+            
+            response_data = {
+                'operating_system': os_type,
+                'config_type': config_type,
+                'configuration': {
+                    'type': predefined_type
+                },
+                'download_iso_url': download_iso_url
+            }
+            
+            print(f"Sending predefined response: {response_data}")
+            return Response(response_data, status=status.HTTP_201_CREATED)
 
-                if upload_wallpaper_response.status_code != 200:
-                    return Response(
-                        {'error': 'Failed to upload wallpaper to Flask server'},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                    )
-                print("Wallpaper uploaded to Flask server successfully.")
-                
-                # Update config data with wallpaper path
-                config_data['configuration']['wallpaper_path'] = str(wallpaper_path)
+        # Handle Custom configuration
+        # Handle wallpaper upload if present
+        if wallpaper:
+            print(f"Wallpaper received: {wallpaper.name}")
+            
+            # Create wallpaper directory if it doesn't exist
+            wallpaper_dir = BASE_DIR.parent / "project" / "wallpaper"
+            wallpaper_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Save wallpaper locally
+            wallpaper_path = wallpaper_dir / wallpaper.name
+            with open(wallpaper_path, 'wb') as f:
+                for chunk in wallpaper.chunks():
+                    f.write(chunk)
+            print(f"Wallpaper written to {wallpaper_path}")
+
+            # Upload to Flask server
+            flask_upload_wallpaper = f"http://{settings.FLASK_SERVER_IP}:{settings.FLASK_SERVER_PORT}/upload-wallpaper"
+            with open(wallpaper_path, 'rb') as f:
+                files = {'file': f}
+                upload_wallpaper_response = requests.post(flask_upload_wallpaper, files=files)
+
+            if upload_wallpaper_response.status_code != 200:
+                return Response(
+                    {'error': 'Failed to upload wallpaper to Flask server'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            print("Wallpaper uploaded to Flask server successfully.")
+            
+            # Update config data with wallpaper path
+            config_data['configuration']['wallpaper_path'] = str(wallpaper_path)
         else:
             print("No wallpaper")
             config_data = request.data
